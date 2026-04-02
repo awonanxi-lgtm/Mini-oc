@@ -638,7 +638,7 @@ async function talkToBuddy() {
 
     if (provider === 'gemini') {
       // Native Gemini format — works from hosted sites (not local files)
-      const model = 'gemini-1.5-flash';
+      const model = 'gemini-2.5-flash-lite';
       fetchUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       fetchOpts = {
         method: 'POST',
