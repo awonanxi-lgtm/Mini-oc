@@ -1,683 +1,909 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buddy</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Buddy · 神秘伙伴蛋</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #fdf6f0; --card: #ffffff; --accent: #ff7f5c; --accent2: #ffb347;
-    --text: #3a2e2e; --soft: #f5e6da; --shadow: 0 8px 32px rgba(200,120,80,0.13);
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none; /* 避免拖动干扰，但输入框正常 */
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    background: var(--bg); font-family: 'Nunito', sans-serif; color: var(--text);
-    min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; padding: 24px 16px;
-    background-image: radial-gradient(circle at 20% 20%, #ffe0cc44 0%, transparent 60%),
-                      radial-gradient(circle at 80% 80%, #b3e0f244 0%, transparent 60%);
+    background: #fdf6f0;
+    font-family: 'Nunito', sans-serif;
+    color: #3a2e2e;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px 32px;
+    background-image: radial-gradient(circle at 20% 30%, #ffe0cc44 0%, transparent 60%),
+                      radial-gradient(circle at 85% 70%, #b3e0f244 0%, transparent 60%);
   }
-  h1 { font-family:'Fredoka One',cursive; font-size:2.2rem; color:var(--accent); letter-spacing:1px; margin-bottom:4px; text-align:center; }
-  .subtitle { font-size:0.95rem; color:#a08878; margin-bottom:28px; text-align:center; }
-  .card { background:var(--card); border-radius:28px; box-shadow:var(--shadow); padding:28px 24px 22px;
-    width:100%; max-width:360px; display:flex; flex-direction:column; align-items:center; gap:18px; }
 
-  /* EGG SCREEN */
-  #egg-screen { display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; }
-  #egg-emoji { font-size:100px; animation:eggwiggle 1.2s ease-in-out infinite; cursor:pointer; user-select:none; }
-  @keyframes eggwiggle { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(6deg)} }
-  .egg-hint { font-size:0.9rem; color:#b09080; font-weight:600; text-align:center; }
-  .tap-hint { font-size:0.75rem; color:#c0a890; animation:pulse 1.5s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.3rem;
+    color: #ff7f5c;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+    text-align: center;
+  }
+  .sub {
+    font-size: 0.85rem;
+    color: #b09080;
+    margin-bottom: 20px;
+    text-align: center;
+  }
 
-  /* PET SCREEN */
-  #pet-screen { display:none; flex-direction:column; align-items:center; gap:18px; width:100%; }
+  /* 主卡片 */
+  .card {
+    background: #ffffff;
+    border-radius: 42px;
+    box-shadow: 0 20px 35px rgba(200, 120, 80, 0.15);
+    padding: 24px 20px 22px;
+    width: 100%;
+    max-width: 400px;
+    transition: all 0.2s ease;
+  }
 
-  /* Name */
-  .name-row { display:flex; align-items:center; gap:10px; width:100%; justify-content:center; }
-  #pet-name-display { font-family:'Fredoka One',cursive; font-size:1.5rem; color:var(--text); }
-  #edit-name-btn { background:none; border:none; cursor:pointer; font-size:1.1rem; color:#c0a090; padding:2px 6px; border-radius:8px; transition:background 0.15s; }
-  #edit-name-btn:hover { background:var(--soft); }
-  #name-input-row { display:none; gap:8px; align-items:center; width:100%; justify-content:center; }
-  #name-input { font-family:'Nunito',sans-serif; font-size:1rem; border:2px solid var(--accent2); border-radius:12px; padding:6px 12px; outline:none; width:160px; color:var(--text); }
-  #save-name-btn { background:var(--accent); color:#fff; border:none; border-radius:12px; padding:7px 16px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; }
-  .rarity-badge { font-size:0.72rem; font-weight:700; letter-spacing:0.1em; padding:3px 10px; border-radius:20px; text-transform:uppercase; }
-  .rarity-common    { background:#e8e0da; color:#8a7a72; }
-  .rarity-rare      { background:#cce8f4; color:#2a7a9a; }
-  .rarity-epic      { background:#e8d4f8; color:#6a2a9a; }
-  .rarity-legendary { background:linear-gradient(90deg,#ffe066,#ffb347); color:#7a4a00; }
+  /* ---------- 蛋屏幕 (未孵化) ---------- */
+  .egg-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+  .egg-emoji {
+    font-size: 110px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    animation: eggWobble 1.2s infinite ease-in-out;
+    filter: drop-shadow(0 12px 18px rgba(0,0,0,0.1));
+  }
+  .egg-emoji:active {
+    transform: scale(0.94);
+  }
+  @keyframes eggWobble {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(6deg); }
+  }
+  .egg-hint {
+    background: #f5e6da;
+    border-radius: 60px;
+    padding: 8px 20px;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #ff7f5c;
+    letter-spacing: 0.5px;
+    text-align: center;
+    box-shadow: inset 0 -1px 0 #ffe0cc, 0 4px 8px rgba(0,0,0,0.02);
+  }
+  .simple-note {
+    font-size: 0.85rem;
+    color: #b09080;
+    background: #fff4ed;
+    padding: 6px 14px;
+    border-radius: 30px;
+    display: inline-block;
+  }
 
-  /* Pet display */
-  .pet-area { position:relative; width:180px; height:180px; display:flex; align-items:center; justify-content:center; }
-  .pet-bg { position:absolute; width:160px; height:160px; border-radius:50%; background:var(--soft); z-index:0; transition:transform 0.3s, background 0.5s; }
-  .pet-area:hover .pet-bg { transform:scale(1.07); }
-  #pet-canvas { position:relative; z-index:1; font-size:90px; line-height:1; cursor:pointer; user-select:none; animation:idle 3.5s ease-in-out infinite; }
-  @keyframes idle { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-8px) rotate(2deg)} }
-  #pet-canvas.bounce { animation:none; transform:scale(1.25) rotate(-5deg); }
-  #pet-canvas.happy  { animation:spin 0.4s ease-in-out; }
-  @keyframes spin { 0%{transform:rotate(0deg) scale(1.1)} 50%{transform:rotate(15deg) scale(1.3)} 100%{transform:rotate(0deg) scale(1)} }
-  .hearts-container { position:absolute; top:0;left:0;right:0;bottom:0; pointer-events:none; z-index:10; }
-  .heart { position:absolute; font-size:1.4rem; animation:floatUp 1.2s ease-out forwards; pointer-events:none; }
-  @keyframes floatUp { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-70px) scale(1.4)} }
+  /* ---------- 宠物主界面 (孵化后) ---------- */
+  .pet-ui {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+  }
 
-  /* Speech */
-  .speech-bubble { background:var(--soft); border-radius:18px 18px 18px 4px; padding:10px 16px;
-    font-size:0.9rem; color:var(--text); text-align:center; min-height:44px; width:100%;
-    transition:opacity 0.4s; line-height:1.4; font-weight:600; }
+  /* 名字行 */
+  .name-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  #pet-name-display {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.7rem;
+    color: #3a2e2e;
+  }
+  .edit-name-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #c0a090;
+    padding: 4px 8px;
+    border-radius: 40px;
+    transition: background 0.1s;
+  }
+  .edit-name-btn:hover { background: #f5e6da; }
+  .name-edit-row {
+    display: none;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  #name-input {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    border: 2px solid #ffb347;
+    border-radius: 30px;
+    padding: 6px 14px;
+    outline: none;
+    width: 150px;
+    background: #fffaf5;
+  }
+  .save-name-btn {
+    background: #ff7f5c;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 30px;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+  }
+  .rarity-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 4px 12px;
+    border-radius: 40px;
+    text-transform: uppercase;
+  }
+  .rarity-common { background: #e8e0da; color: #8a7a72; }
+  .rarity-rare { background: #cce8f4; color: #2a7a9a; }
+  .rarity-epic { background: #e8d4f8; color: #6a2a9a; }
+  .rarity-legendary { background: linear-gradient(90deg, #ffe066, #ffb347); color: #7a4a00; }
 
-  /* Stats */
-  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; }
-  .stat-box { background:var(--soft); border-radius:14px; padding:9px 12px; display:flex; flex-direction:column; gap:4px; }
-  .stat-label { font-size:0.7rem; font-weight:700; letter-spacing:0.08em; color:#b09080; text-transform:uppercase; display:flex; justify-content:space-between; }
-  .stat-val { font-weight:700; color:var(--text); }
-  .stat-bar-wrap { background:#eeddd2; border-radius:8px; height:8px; overflow:hidden; }
-  .stat-bar { height:100%; border-radius:8px; transition:width 0.6s cubic-bezier(.4,2,.6,1); }
+  /* 宠物展示区 */
+  .pet-zone {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pet-bg-glow {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: #f5e6da;
+    transition: background 0.3s, transform 0.3s;
+    z-index: 0;
+  }
+  .pet-zone:hover .pet-bg-glow {
+    transform: scale(1.06);
+  }
+  #pet-emoji {
+    position: relative;
+    z-index: 2;
+    font-size: 96px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    animation: petIdle 3.5s infinite ease-in-out;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.08));
+  }
+  @keyframes petIdle {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-8px) rotate(2deg); }
+  }
+  #pet-emoji.bounce { animation: none; transform: scale(1.2) rotate(-4deg); }
+  #pet-emoji.happy { animation: spinHappy 0.4s ease-in-out; }
+  @keyframes spinHappy {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(12deg) scale(1.2); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
 
-  /* Actions */
-  .actions { display:flex; gap:10px; width:100%; }
-  .action-btn { flex:1; padding:11px 6px; border:none; border-radius:16px; font-family:'Fredoka One',cursive; font-size:1rem;
-    cursor:pointer; transition:transform 0.1s,box-shadow 0.1s; display:flex; flex-direction:column; align-items:center; gap:2px;
-    color:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.09); }
-  .action-btn:active { transform:scale(0.95); box-shadow:none; }
-  .action-btn .icon { font-size:1.5rem; }
-  .btn-pet  { background:linear-gradient(135deg,#ff7f5c,#ffb347); }
-  .btn-feed { background:linear-gradient(135deg,#7ec8e3,#5ba8c9); }
-  .btn-play { background:linear-gradient(135deg,#b8f5a0,#60c840); color:#2a5a18; }
+  .hearts {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .heart {
+    position: absolute;
+    font-size: 1.4rem;
+    animation: floatUp 1.2s forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(0.8); }
+    100% { opacity: 0; transform: translateY(-70px) scale(1.3); }
+  }
 
-  /* Talk */
-  .talk-row { display:flex; gap:8px; width:100%; }
-  #talk-input { flex:1; font-family:'Nunito',sans-serif; font-size:0.9rem; border:2px solid #eeddd2;
-    border-radius:14px; padding:8px 14px; outline:none; color:var(--text); background:var(--soft); transition:border-color 0.2s; }
-  #talk-input:focus { border-color:var(--accent2); }
-  #talk-btn { background:var(--accent); color:#fff; border:none; border-radius:14px; padding:8px 16px;
-    font-family:'Fredoka One',cursive; font-size:0.95rem; cursor:pointer; }
-  #loading-reply { display:none; font-style:italic; color:#b09080; font-size:0.85rem; }
+  /* 气泡 */
+  .speech {
+    background: #f5e6da;
+    border-radius: 24px 24px 24px 12px;
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+    width: 100%;
+    min-height: 54px;
+    transition: opacity 0.2s;
+    color: #4a3a2a;
+  }
 
-  /* End screens */
-  .end-screen { display:none; flex-direction:column; align-items:center; gap:12px; text-align:center; width:100%; }
-  .end-emoji { font-size:72px; }
-  .end-title { font-family:'Fredoka One',cursive; font-size:1.4rem; }
-  .end-msg   { font-size:0.88rem; color:#a08878; line-height:1.5; }
-  .end-btn   { background:var(--accent); color:#fff; border:none; border-radius:16px; padding:10px 24px;
-    font-family:'Fredoka One',cursive; font-size:1rem; cursor:pointer; margin-top:4px; }
+  /* 统计数据 */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+  .stat-card {
+    background: #f5e6da;
+    border-radius: 22px;
+    padding: 8px 12px;
+  }
+  .stat-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #b09080;
+    letter-spacing: 0.05em;
+  }
+  .stat-value {
+    font-weight: 800;
+    color: #3a2e2e;
+  }
+  .stat-bar-bg {
+    background: #eeddd2;
+    border-radius: 12px;
+    height: 8px;
+    margin-top: 5px;
+    overflow: hidden;
+  }
+  .stat-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.5s cubic-bezier(0.2, 1.2, 0.4, 1);
+  }
 
-  /* API */
-  .api-section { width:100%; border-top:1.5px dashed #eeddd2; padding-top:14px; display:flex; flex-direction:column; gap:8px; }
-  .api-section.no-border { border-top:none; padding-top:0; }
-  .api-label { font-size:0.78rem; font-weight:700; color:#b09080; letter-spacing:0.06em; text-transform:uppercase; }
-  .api-row { display:flex; gap:8px; align-items:center; }
-  .api-select, .api-key-inp { flex:1; font-family:'Nunito',sans-serif; font-size:0.85rem; border:2px solid #eeddd2;
-    border-radius:12px; padding:7px 12px; outline:none; color:var(--text); background:var(--soft); transition:border-color 0.2s; width:100%; }
-  .api-select { cursor:pointer; }
-  .api-select:focus, .api-key-inp:focus { border-color:var(--accent2); }
-  .api-save-btn { background:var(--accent2); color:#fff; border:none; border-radius:12px; padding:7px 14px;
-    font-family:'Fredoka One',cursive; font-size:0.9rem; cursor:pointer; white-space:nowrap; }
-  .api-status { font-size:0.78rem; color:#b09080; text-align:center; }
-  .api-status.ok { color:#60c840; font-weight:700; }
+  /* 按钮组 */
+  .action-group {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+  .action {
+    flex: 1;
+    background: linear-gradient(135deg, #ff7f5c, #ffb347);
+    border: none;
+    border-radius: 38px;
+    padding: 10px 0;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    transition: transform 0.08s linear;
+  }
+  .action:active { transform: scale(0.96); }
+  .action .action-icon { font-size: 1.6rem; }
+  .feed-btn { background: linear-gradient(135deg, #7ec8e3, #5ba8c9); }
+  .play-btn { background: linear-gradient(135deg, #b8f5a0, #60c840); color: #2a5a18; }
 
-  /* Debug */
-  #debug-panel { display:none; width:100%; }
-  #debug-log { font-size:0.68rem; background:#f5e6da; border-radius:10px; padding:8px; overflow-x:auto;
-    white-space:pre-wrap; word-break:break-all; color:#5a3a2a; max-height:120px; overflow-y:auto; }
+  /* 对话条 */
+  .talk-area {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+  #talk-input {
+    flex: 1;
+    background: #f5e6da;
+    border: 2px solid #eeddd2;
+    border-radius: 30px;
+    padding: 10px 16px;
+    font-family: 'Nunito', sans-serif;
+    outline: none;
+    font-size: 0.85rem;
+  }
+  #talk-input:focus { border-color: #ffb347; }
+  #talk-send {
+    background: #ff7f5c;
+    border: none;
+    border-radius: 40px;
+    padding: 0 18px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.9rem;
+    color: white;
+    cursor: pointer;
+  }
+
+  /* API 区块 全局可用 */
+  .api-panel {
+    margin-top: 10px;
+    border-top: 2px dashed #eeddd2;
+    padding-top: 14px;
+    width: 100%;
+  }
+  .api-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #b09080;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .api-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .api-select, .api-key-input {
+    flex: 1;
+    background: #f5e6da;
+    border: 2px solid #eeddd2;
+    border-radius: 28px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    outline: none;
+  }
+  .api-save {
+    background: #ffb347;
+    border: none;
+    border-radius: 30px;
+    padding: 6px 14px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .api-status {
+    font-size: 0.7rem;
+    text-align: center;
+    color: #b09080;
+  }
+  .api-status.ok { color: #60c840; font-weight: bold; }
+
+  /* 结束界面 (自由/丢失) */
+  .end-overlay {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: center;
+    padding: 8px 0;
+  }
+  .end-emoji-big {
+    font-size: 68px;
+  }
+  .end-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+  }
+  .reset-btn {
+    background: #ff7f5c;
+    border: none;
+    border-radius: 40px;
+    padding: 10px 24px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 4px;
+    color: white;
+  }
+
+  /* debug 简洁 */
+  .debug-wrap {
+    display: none;
+    margin-top: 12px;
+    width: 100%;
+  }
+  .debug-log {
+    background: #f5e6da;
+    border-radius: 16px;
+    padding: 6px;
+    font-size: 0.6rem;
+    max-height: 100px;
+    overflow: auto;
+    color: #5a3a2a;
+  }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
-
 <h1>🐾 Buddy</h1>
-<p class="subtitle">Your very own digital companion</p>
-
+<div class="sub">a tiny friend, full of heart</div>
 <div class="card">
 
-  <!-- EGG SCREEN -->
-  <div id="egg-screen">
-    <div class="egg-hint">A mystery egg is waiting for you…</div>
-    <div id="egg-emoji">🥚</div>
-    <div class="tap-hint">tap the egg or press any button to hatch!</div>
-    <div class="api-section no-border">
-      <div class="api-label">🔑 Set API key before hatching (optional)</div>
-      <div class="api-row">
-        <select class="api-select" id="api-provider-egg">
-          <option value="anthropic">Anthropic (Claude)</option>
-          <option value="gemini">Google Gemini (AI Studio)</option>
-          <option value="deepseek">DeepSeek</option>
-          <option value="openai">OpenAI / compatible</option>
-        </select>
-      </div>
-      <div class="api-row">
-        <input class="api-key-inp" id="api-key-egg" type="password" placeholder="Paste your API key…" autocomplete="off" />
-        <button class="api-save-btn" id="save-api-egg">Save</button>
-      </div>
-      <div class="api-status" id="api-status-egg">No key saved yet.</div>
+  <!-- 蛋界面 (未孵化) -->
+  <div id="eggScreen">
+    <div class="egg-container">
+      <div class="egg-emoji" id="eggEmoji">🥚</div>
+      <div class="egg-hint">✨ Tap it to hatch your egg! ✨</div>
+      <div class="simple-note">💡 click the egg or any button after hatching</div>
     </div>
   </div>
 
-  <!-- PET SCREEN -->
-  <div id="pet-screen">
-
-    <div class="name-row" id="name-display-row">
-      <span id="pet-name-display"></span>
-      <button id="edit-name-btn" title="Rename">✏️</button>
-      <span id="rarity-badge" class="rarity-badge"></span>
-    </div>
-    <div id="name-input-row">
-      <input id="name-input" maxlength="20" placeholder="New name…" />
-      <button id="save-name-btn">Save</button>
-    </div>
-
-    <div class="pet-area">
-      <div class="pet-bg" id="pet-bg"></div>
-      <div id="pet-canvas">🥚</div>
-      <div class="hearts-container" id="hearts"></div>
-    </div>
-
-    <div class="speech-bubble" id="bubble">…</div>
-    <div id="loading-reply">thinking…</div>
-
-    <div class="stats-grid" id="stats-grid"></div>
-
-    <div class="actions">
-      <button class="action-btn btn-pet"  id="btn-pet" ><span class="icon">🤗</span>Pet</button>
-      <button class="action-btn btn-feed" id="btn-feed"><span class="icon">🍎</span>Feed</button>
-      <button class="action-btn btn-play" id="btn-play"><span class="icon">🎾</span>Play</button>
-    </div>
-
-    <div class="talk-row">
-      <input id="talk-input" placeholder="Say something…" maxlength="120" />
-      <button id="talk-btn">Send</button>
-    </div>
-
-    <!-- Free / Lost end screens -->
-    <div class="end-screen" id="free-screen">
-      <div class="end-emoji" id="free-emoji"></div>
-      <div class="end-title" style="color:#60c840">Set Free! 🌟</div>
-      <div class="end-msg"   id="free-msg"></div>
-      <button class="end-btn" id="btn-new-egg-free">Hatch a new egg 🥚</button>
-    </div>
-    <div class="end-screen" id="lost-screen">
-      <div class="end-emoji" id="lost-emoji"></div>
-      <div class="end-title" style="color:#ff5050">Buddy is gone… 💔</div>
-      <div class="end-msg"   id="lost-msg"></div>
-      <button class="end-btn" id="btn-new-egg-lost">Try again 🥚</button>
-    </div>
-
-    <div class="api-section">
-      <div class="api-label">🔑 API Settings</div>
-      <div class="api-row">
-        <select class="api-select" id="api-provider-pet">
-          <option value="anthropic">Anthropic (Claude)</option>
-          <option value="gemini">Google Gemini (AI Studio)</option>
-          <option value="deepseek">DeepSeek</option>
-          <option value="openai">OpenAI / compatible</option>
-        </select>
+  <!-- 宠物主界面 (孵化后) -->
+  <div id="petScreen" style="display: none;">
+    <div class="pet-ui">
+      <!-- 名字行 -->
+      <div class="name-row" id="nameRow">
+        <span id="pet-name-display">???</span>
+        <button class="edit-name-btn" id="editNameBtn">✏️</button>
+        <span id="raritySpan" class="rarity-badge"></span>
       </div>
-      <div class="api-row">
-        <input class="api-key-inp" id="api-key-pet" type="password" placeholder="Paste your API key…" autocomplete="off" />
-        <button class="api-save-btn" id="save-api-pet">Save</button>
+      <div class="name-edit-row" id="nameEditRow">
+        <input id="nameInput" maxlength="20" placeholder="New name">
+        <button class="save-name-btn" id="saveNameBtn">Save</button>
       </div>
-      <div class="api-status" id="api-status-pet">No key saved yet.</div>
-    </div>
 
-    <div id="debug-panel">
-      <div style="font-size:0.7rem;font-weight:700;color:#b09080;text-transform:uppercase;margin-bottom:4px;">🔍 Debug log</div>
-      <pre id="debug-log"></pre>
+      <!-- 宠物展示 + 爱心 -->
+      <div class="pet-zone">
+        <div class="pet-bg-glow" id="petBgGlow"></div>
+        <div id="pet-emoji">🐾</div>
+        <div class="hearts" id="heartsContainer"></div>
+      </div>
+
+      <!-- 对话气泡 -->
+      <div class="speech" id="speechBubble">💬 Say something...</div>
+
+      <!-- 五维属性 -->
+      <div class="stat-grid" id="statsGrid"></div>
+
+      <!-- 三个主要互动 -->
+      <div class="action-group">
+        <button class="action" id="petBtn"><span class="action-icon">🤗</span> Pet</button>
+        <button class="action feed-btn" id="feedBtn"><span class="action-icon">🍎</span> Feed</button>
+        <button class="action play-btn" id="playBtn"><span class="action-icon">🎾</span> Play</button>
+      </div>
+
+      <!-- 聊天 -->
+      <div class="talk-area">
+        <input id="talkInput" placeholder="Talk to your buddy..." maxlength="100">
+        <button id="talkSendBtn">Send</button>
+      </div>
+      <div id="talkLoading" style="display:none; font-size:0.7rem; color:#b09080;">✨ thinking...</div>
     </div>
   </div>
 
+  <!-- 自由 / 丢失 共用结束层 (覆盖宠物界面) -->
+  <div id="endModal" style="display: none;">
+    <div class="end-overlay" id="endFreeScreen">
+      <div class="end-emoji-big" id="freeEmoji">🌟</div>
+      <div class="end-title" style="color:#60c840;">Set Free! 🕊️</div>
+      <div id="freeMessage" class="speech" style="background:#e8f5e8;">Buddy reached the stars...</div>
+      <button class="reset-btn" id="resetFromFree">Start a new egg 🥚</button>
+    </div>
+    <div class="end-overlay" id="endLostScreen">
+      <div class="end-emoji-big" id="lostEmoji">💔</div>
+      <div class="end-title" style="color:#ff5050;">Lost & gone...</div>
+      <div id="lostMessage" class="speech" style="background:#ffe0dc;">Your buddy wandered away</div>
+      <button class="reset-btn" id="resetFromLost">Hatch a new egg 🥚</button>
+    </div>
+  </div>
+
+  <!-- API 设置 (全局，蛋界面和宠物界面都可见) -->
+  <div class="api-panel" id="apiGlobalPanel">
+    <div class="api-title">🔑 API (optional – unlocks smart chat)</div>
+    <div class="api-row">
+      <select id="apiProviderSelect" class="api-select">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="openai">OpenAI / compatible</option>
+      </select>
+    </div>
+    <div class="api-row">
+      <input type="password" id="apiKeyInput" class="api-key-input" placeholder="Paste API key..." autocomplete="off">
+      <button id="saveApiBtn" class="api-save">Save</button>
+    </div>
+    <div id="apiStatusMsg" class="api-status">⚡ No key — chat uses simple mode</div>
+  </div>
+
+  <div id="debugWrap" class="debug-wrap">
+    <div style="font-size:0.65rem; font-weight:bold;">📋 debug (AI only)</div>
+    <pre id="debugLog" class="debug-log"></pre>
+  </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════
-// SPECIES & STATS DATA
-// ════════════════════════════════════════════
-const SPECIES = [
-  { emoji:'🦆', name:'Duck',      rarity:'common',    color:'#ffe066' },
-  { emoji:'🐱', name:'Cat',       rarity:'common',    color:'#ffb347' },
-  { emoji:'🐸', name:'Frog',      rarity:'common',    color:'#b8f5a0' },
-  { emoji:'🐹', name:'Hamster',   rarity:'common',    color:'#ffcba4' },
-  { emoji:'🐧', name:'Penguin',   rarity:'rare',      color:'#7ec8e3' },
-  { emoji:'🦉', name:'Owl',       rarity:'rare',      color:'#c8b8f0' },
-  { emoji:'🐙', name:'Octopus',   rarity:'rare',      color:'#ff9fd4' },
-  { emoji:'🦋', name:'Butterfly', rarity:'rare',      color:'#ffe0f0' },
-  { emoji:'🐉', name:'Dragon',    rarity:'epic',      color:'#ff7f5c' },
-  { emoji:'🦊', name:'Fox',       rarity:'epic',      color:'#ffb347' },
-  { emoji:'🦑', name:'Squid',     rarity:'epic',      color:'#c8a8f0' },
-  { emoji:'🦄', name:'Unicorn',   rarity:'legendary', color:'#f0c0ff' },
-  { emoji:'👽', name:'Alien',     rarity:'legendary', color:'#a8f0c8' },
-];
+  // ---------- 物种库 (来自 index.html，确保图文一致) ----------
+  const SPECIES = [
+    { emoji:'🦆', name:'Duck',      rarity:'common',    color:'#ffe066' },
+    { emoji:'🐱', name:'Cat',       rarity:'common',    color:'#ffb347' },
+    { emoji:'🐸', name:'Frog',      rarity:'common',    color:'#b8f5a0' },
+    { emoji:'🐹', name:'Hamster',   rarity:'common',    color:'#ffcba4' },
+    { emoji:'🐧', name:'Penguin',   rarity:'rare',      color:'#7ec8e3' },
+    { emoji:'🦉', name:'Owl',       rarity:'rare',      color:'#c8b8f0' },
+    { emoji:'🐙', name:'Octopus',   rarity:'rare',      color:'#ff9fd4' },
+    { emoji:'🦋', name:'Butterfly', rarity:'rare',      color:'#ffe0f0' },
+    { emoji:'🐉', name:'Dragon',    rarity:'epic',      color:'#ff7f5c' },
+    { emoji:'🦊', name:'Fox',       rarity:'epic',      color:'#ffb347' },
+    { emoji:'🦑', name:'Squid',     rarity:'epic',      color:'#c8a8f0' },
+    { emoji:'🦄', name:'Unicorn',   rarity:'legendary', color:'#f0c0ff' },
+    { emoji:'👽', name:'Alien',     rarity:'legendary', color:'#a8f0c8' }
+  ];
+  const STATS = ['Wisdom', 'Chaos', 'Patience', 'Snark', 'Vibes'];
+  const STAT_COLORS = ['#7ec8e3','#ff7f5c','#b8f5a0','#ffb347','#c8a8f0'];
 
-const STATS       = ['Wisdom','Chaos','Patience','Snark','Vibes'];
-const STAT_COLORS = ['#7ec8e3','#ff7f5c','#b8f5a0','#ffb347','#c8a8f0'];
-
-// Delta per action: [Wisdom, Chaos, Patience, Snark, Vibes]
-const DELTA = {
-  pet:  [  2, -3,  5, -2,  8 ],
-  feed: [  1,  2, -2,  0,  5 ],
-  play: [ -2,  8, -5,  3,  6 ],
-  talk: [  1,  2,  0,  1,  3 ],
-};
-
-const REACTIONS = {
-  pet:  ["Purrrfect~ 💕","Ohhh yes~ 🥰","*happy wiggles* 💫","You're the best! 🌟","Heehee~ 🩷"],
-  feed: ["Nom nom nom!! 😋","SO GOOD!! 🍎✨","You remembered!! 😭","*happy chomping* 🍴","More?? 👀"],
-  play: ["WHEEEEE 🎉","YES YES YES!!","*zooming intensifies* 💨","That was SO fun!!","Again!! Again!! 🎾"],
-  tap:  ["Hiii!! 👋","*happy noise* 💛","You noticed me!! 🥹","Eeeee!! 🎉","*wiggles*"],
-};
-
-// ════════════════════════════════════════════
-// SEEDED RNG — same seed = same buddy always
-// ════════════════════════════════════════════
-function mulberry32(seed) {
-  return function() {
-    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  // 动作基础影响 (与buddy-3类似)
+  const BASE_DELTA = {
+    pet:  [ 2, -2, 4, -1, 5],
+    feed: [ 1, 1, -1, 0, 4],
+    play: [-1, 5, -3, 2, 4],
+    talk: [ 1, 1, 1, 1, 2]
   };
-}
-function getOrCreateSeed() {
-  try {
-    let s = localStorage.getItem('buddy-seed');
-    if (s) return parseInt(s);
-    s = Math.floor(Math.random() * 999999999);
-    localStorage.setItem('buddy-seed', String(s));
-    return s;
-  } catch(e) { return Math.floor(Math.random() * 999999999); }
-}
+  const REACTIONS = {
+    pet:  ['Purrrfect~ 💕','So cozy 🥰','*happy purr* 💫','Best friend! 🌟','Warm hug~ 🧡'],
+    feed: ['Yummy!! 🍎','Nom nom! 😋','Delicious!! ✨','Thank you! 😭','More!! 👀'],
+    play: ['Wheeee! 🎉','Zoomies!! 💨','So fun!! 🎾','Again! Again!','*happy dance* 🕺'],
+    tap:  ['Hiii~ 👋','You noticed me! 💛','*wiggles*','Eeee! 🎉','Hehe~']
+  };
 
-// ════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════
-let buddy   = null;
-let hatched = false;
-
-function createFreshBuddy() {
-  const seed = getOrCreateSeed();
-  const rng  = mulberry32(seed);
-  const sp   = SPECIES[Math.floor(rng() * SPECIES.length)];
-  const stats = {};
-  STATS.forEach(s => { stats[s] = Math.floor(30 + rng() * 40); });
-  return { name: sp.name, species: sp, stats, hatched: false };
-}
-
-function save() {
-  try { localStorage.setItem('my-buddy', JSON.stringify(buddy)); } catch(e) {}
-}
-
-function loadSaved() {
-  try {
-    const raw = localStorage.getItem('my-buddy');
-    if (!raw) return null;
-    const b = JSON.parse(raw);
-    // Recompute species from seed to prevent emoji/name drift
-    const seed = getOrCreateSeed();
-    const rng  = mulberry32(seed);
-    b.species  = SPECIES[Math.floor(rng() * SPECIES.length)];
-    return b;
-  } catch(e) { return null; }
-}
-
-// ════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════
-function render() {
-  if (!buddy) return;
-  // Emoji & name — both from same species object so they always match
-  document.getElementById('pet-canvas').textContent      = buddy.species.emoji;
-  document.getElementById('pet-name-display').textContent = buddy.name;
-
-  const rb = document.getElementById('rarity-badge');
-  rb.textContent = buddy.species.rarity;
-  rb.className   = 'rarity-badge rarity-' + buddy.species.rarity;
-
-  document.getElementById('pet-bg').style.background = buddy.species.color + '55';
-
-  renderStats();
-}
-
-function renderStats() {
-  const grid = document.getElementById('stats-grid');
-  grid.innerHTML = '';
-  STATS.forEach((s, i) => {
-    const val = Math.round(Math.max(0, Math.min(100, buddy.stats[s])));
-    const div = document.createElement('div');
-    div.className = 'stat-box';
-    div.innerHTML = `
-      <div class="stat-label"><span>${s}</span><span class="stat-val">${val}</span></div>
-      <div class="stat-bar-wrap">
-        <div class="stat-bar" style="width:${val}%;background:${STAT_COLORS[i]}"></div>
-      </div>`;
-    grid.appendChild(div);
-  });
-}
-
-// ════════════════════════════════════════════
-// SCREENS
-// ════════════════════════════════════════════
-const PET_CONTROLS = ['#stats-grid','.actions','.talk-row','.speech-bubble','#loading-reply'];
-
-function showEggScreen() {
-  document.getElementById('egg-screen').style.display = 'flex';
-  document.getElementById('pet-screen').style.display = 'none';
-}
-
-function showPetScreen() {
-  document.getElementById('egg-screen').style.display = 'none';
-  document.getElementById('pet-screen').style.display = 'flex';
-  document.getElementById('free-screen').style.display = 'none';
-  document.getElementById('lost-screen').style.display = 'none';
-  PET_CONTROLS.forEach(sel => {
-    const el = sel.startsWith('#') ? document.getElementById(sel.slice(1)) : document.querySelector(sel);
-    if (el) el.style.display = '';
-  });
-  document.getElementById('name-display-row').style.display = 'flex';
-  syncApiPetForm();
-}
-
-function showEndScreen(type) {
-  // Hide pet controls
-  PET_CONTROLS.forEach(sel => {
-    const el = sel.startsWith('#') ? document.getElementById(sel.slice(1)) : document.querySelector(sel);
-    if (el) el.style.display = 'none';
-  });
-  document.getElementById('name-display-row').style.display = 'none';
-  document.getElementById('name-input-row').style.display   = 'none';
-
-  if (type === 'free') {
-    document.getElementById('free-screen').style.display = 'flex';
-    document.getElementById('lost-screen').style.display = 'none';
-    document.getElementById('free-emoji').textContent = buddy.species.emoji;
-    document.getElementById('free-msg').textContent =
-      `${buddy.name} the ${buddy.species.name} reached full happiness and flew off into the world! Goodbye! 🌈`;
-  } else {
-    document.getElementById('lost-screen').style.display = 'flex';
-    document.getElementById('free-screen').style.display = 'none';
-    document.getElementById('lost-emoji').textContent = buddy.species.emoji;
-    document.getElementById('lost-msg').textContent =
-      `${buddy.name} the ${buddy.species.name} felt neglected and wandered away… 😢`;
-  }
-}
-
-function checkEndCondition() {
-  const vals = STATS.map(s => buddy.stats[s]);
-  if (vals.some(v => v >= 100)) { save(); showEndScreen('free'); return true; }
-  if (vals.some(v => v <= 0))   { save(); showEndScreen('lost'); return true; }
-  return false;
-}
-
-function resetAll() {
-  try { localStorage.removeItem('my-buddy'); localStorage.removeItem('buddy-seed'); } catch(e) {}
-  buddy   = createFreshBuddy();
-  hatched = false;
-  save();
-  showEggScreen();
-}
-
-document.getElementById('btn-new-egg-free').addEventListener('click', resetAll);
-document.getElementById('btn-new-egg-lost').addEventListener('click', resetAll);
-
-// ════════════════════════════════════════════
-// HATCH
-// ════════════════════════════════════════════
-function hatch() {
-  if (hatched) return;
-  hatched        = true;
-  buddy.hatched  = true;
-  save();
-
-  const egg = document.getElementById('egg-emoji');
-  egg.style.animation = 'none';
-  egg.style.transform = 'scale(1.3)';
-  setTimeout(() => { egg.textContent = '🐣'; egg.style.transform = ''; }, 300);
-
-  setTimeout(() => {
-    showPetScreen();
-    render();
-    spawnHearts(8);
-    animatePet('happy');
-    setBubble(`A wild ${buddy.species.name} appeared!! 🎉 I'm ${buddy.name}!`);
-  }, 950);
-}
-
-document.getElementById('egg-emoji').addEventListener('click', hatch);
-
-// ════════════════════════════════════════════
-// ANIMATIONS & HELPERS
-// ════════════════════════════════════════════
-function spawnHearts(n) {
-  const c      = document.getElementById('hearts');
-  const emojis = ['💕','💖','✨','🌟','💫','🎉'];
-  for (let i = 0; i < n; i++) setTimeout(() => {
-    const h = document.createElement('div');
-    h.className  = 'heart';
-    h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-    h.style.left = (20 + Math.random()*60) + '%';
-    h.style.top  = (20 + Math.random()*40) + '%';
-    c.appendChild(h);
-    setTimeout(() => h.remove(), 1300);
-  }, i * 140);
-}
-
-function animatePet(cls) {
-  const el = document.getElementById('pet-canvas');
-  el.classList.add(cls);
-  setTimeout(() => el.classList.remove(cls), 600);
-}
-
-function setBubble(text) {
-  const b = document.getElementById('bubble');
-  b.style.opacity = 0;
-  setTimeout(() => { b.textContent = text; b.style.opacity = 1; }, 200);
-}
-
-function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
-
-function applyDelta(action) {
-  STATS.forEach((s, i) => {
-    buddy.stats[s] = Math.max(0, Math.min(100, buddy.stats[s] + DELTA[action][i]));
-  });
-  save();
-  renderStats();
-  return checkEndCondition();
-}
-
-// ════════════════════════════════════════════
-// ACTIONS
-// ════════════════════════════════════════════
-function doAction(action, heartCount, animClass, reactions) {
-  if (!hatched) { hatch(); return; }
-  spawnHearts(heartCount);
-  animatePet(animClass);
-  const ended = applyDelta(action);
-  if (!ended) setBubble(pick(reactions));
-}
-
-document.getElementById('btn-pet').addEventListener('click',  () => doAction('pet',  5, 'happy',  REACTIONS.pet));
-document.getElementById('btn-feed').addEventListener('click', () => doAction('feed', 3, 'bounce', REACTIONS.feed));
-document.getElementById('btn-play').addEventListener('click', () => doAction('play', 6, 'happy',  REACTIONS.play));
-
-document.getElementById('pet-canvas').addEventListener('click', () => {
-  if (!hatched) { hatch(); return; }
-  spawnHearts(3); animatePet('happy');
-  setBubble(pick(REACTIONS.tap));
-});
-
-// ════════════════════════════════════════════
-// API SETTINGS
-// ════════════════════════════════════════════
-function getApiKey()      { try { return localStorage.getItem('buddy-api-key') || ''; }            catch(e) { return ''; } }
-function getApiProvider() { try { return localStorage.getItem('buddy-api-provider') || 'anthropic'; } catch(e) { return 'anthropic'; } }
-
-function refreshApiStatus(statusId, keyId, selectId) {
-  const k = getApiKey(), p = getApiProvider();
-  const labels = { anthropic:'Anthropic', gemini:'Google Gemini', deepseek:'DeepSeek', openai:'OpenAI' };
-  const sel = document.getElementById(selectId);
-  if (sel) sel.value = p;
-  const st = document.getElementById(statusId);
-  if (k) {
-    st.textContent = `✅ ${labels[p]} key saved!`;
-    st.className = 'api-status ok';
-    const inp = document.getElementById(keyId);
-    if (inp) { inp.value = ''; inp.placeholder = '••••••••••••• (saved)'; }
-  } else {
-    st.textContent = "No key saved — chat won't work without one.";
-    st.className = 'api-status';
-  }
-}
-
-function syncApiEggForm() { refreshApiStatus('api-status-egg', 'api-key-egg', 'api-provider-egg'); }
-function syncApiPetForm() { refreshApiStatus('api-status-pet', 'api-key-pet', 'api-provider-pet'); }
-
-function bindApiSave(btnId, keyId, selectId) {
-  document.getElementById(btnId).addEventListener('click', () => {
-    const key = document.getElementById(keyId).value.trim();
-    const prov = document.getElementById(selectId).value;
-    if (!key) return;
+  // 种子系统 (保证同一设备宠物固定)
+  let seedValue = null;
+  function getSeed() {
+    if(seedValue !== null) return seedValue;
     try {
-      localStorage.setItem('buddy-api-key', key);
-      localStorage.setItem('buddy-api-provider', prov);
-    } catch(e) {}
-    syncApiEggForm();
-    syncApiPetForm();
-    if (!hatched) setTimeout(hatch, 400);
-  });
-  document.getElementById(keyId).addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById(btnId).click();
-  });
-}
-
-bindApiSave('save-api-egg', 'api-key-egg', 'api-provider-egg');
-bindApiSave('save-api-pet', 'api-key-pet', 'api-provider-pet');
-syncApiEggForm();
-
-// ════════════════════════════════════════════
-// RENAME
-// ════════════════════════════════════════════
-document.getElementById('edit-name-btn').addEventListener('click', () => {
-  document.getElementById('name-display-row').style.display = 'none';
-  document.getElementById('name-input-row').style.display   = 'flex';
-  document.getElementById('name-input').value = buddy.name;
-  document.getElementById('name-input').focus();
-});
-document.getElementById('save-name-btn').addEventListener('click', () => {
-  const v = document.getElementById('name-input').value.trim();
-  if (v) { buddy.name = v; save(); render(); }
-  document.getElementById('name-display-row').style.display = 'flex';
-  document.getElementById('name-input-row').style.display   = 'none';
-});
-
-// ════════════════════════════════════════════
-// TALK
-// ════════════════════════════════════════════
-async function talkToBuddy() {
-  if (!hatched) { hatch(); return; }
-  const input  = document.getElementById('talk-input');
-  const msg    = input.value.trim();
-  if (!msg) return;
-
-  const apiKey = getApiKey();
-  if (!apiKey) { setBubble('Add your API key below first! 🔑'); return; }
-
-  input.value = '';
-  setBubble('…');
-  document.getElementById('loading-reply').style.display = 'block';
-  animatePet('bounce');
-
-  const sp         = buddy.species;
-  const statsDesc  = STATS.map(s => `${s}:${Math.round(buddy.stats[s])}`).join(', ');
-  const systemPrompt = `You are ${buddy.name}, a ${sp.rarity} ${sp.name} digital pet. You are a tiny creature, NOT an AI assistant. Stats: ${statsDesc}. Reply in 1-2 short sentences with emojis, in character. High Chaos = chaotic/random, High Wisdom = sage-like, High Snark = sassy, High Patience = calm/gentle, High Vibes = hype/energetic. Never break character.`;
-
-  const provider = getApiProvider();
-
-  function dbg(label, val) {
-    const panel = document.getElementById('debug-panel');
-    const log   = document.getElementById('debug-log');
-    panel.style.display = 'block';
-    // Redact API key from URL if present
-    const str = typeof val === 'string' ? val : JSON.stringify(val, null, 2);
-    log.textContent += '[' + label + '] ' + str.replace(/key=[^&\s"]+/g, 'key=***') + '\n';
-    log.scrollTop = log.scrollHeight;
+      let s = localStorage.getItem('buddy-seed');
+      if(s) { seedValue = parseInt(s); return seedValue; }
+      seedValue = Math.floor(Math.random() * 999999999);
+      localStorage.setItem('buddy-seed', String(seedValue));
+    } catch(e) { seedValue = Math.floor(Math.random() * 999999999); }
+    return seedValue;
   }
-  document.getElementById('debug-log').textContent = '';
+  function mulberry32(seed) {
+    return function() {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
 
-  try {
-    let fetchUrl = '', fetchOpts = {};
+  // 全局状态
+  let buddy = null;       // { name, species, stats, hatched }
+  let hatched = false;
+  let currentEndType = null; // 'free' or 'lost'
 
-    if (provider === 'gemini') {
-      fetchUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
-      fetchOpts = { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ system_instruction:{parts:[{text:systemPrompt}]},
-          contents:[{role:'user',parts:[{text:msg}]}], generationConfig:{maxOutputTokens:200} }) };
-    } else if (provider === 'deepseek') {
-      fetchUrl = 'https://api.deepseek.com/v1/chat/completions';
-      fetchOpts = { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-        body: JSON.stringify({ model:'deepseek-chat', max_tokens:200,
-          messages:[{role:'system',content:systemPrompt},{role:'user',content:msg}] }) };
-    } else if (provider === 'anthropic') {
-      fetchUrl = 'https://api.anthropic.com/v1/messages';
-      fetchOpts = { method:'POST', headers:{'Content-Type':'application/json','x-api-key':apiKey,
-          'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:200,
-          system:systemPrompt, messages:[{role:'user',content:msg}] }) };
-    } else {
-      fetchUrl = 'https://api.openai.com/v1/chat/completions';
-      fetchOpts = { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-        body: JSON.stringify({ model:'gpt-4o-mini', max_tokens:200,
-          messages:[{role:'system',content:systemPrompt},{role:'user',content:msg}] }) };
+  // ---------- 创建全新buddy (基于种子) ----------
+  function createNewBuddy() {
+    const seed = getSeed();
+    const rng = mulberry32(seed);
+    const species = SPECIES[Math.floor(rng() * SPECIES.length)];
+    const stats = {};
+    const rngStat = mulberry32(seed ^ 0xabcdef);
+    STATS.forEach(s => { stats[s] = Math.floor(35 + rngStat() * 35); }); // 35~70 不极端
+    return {
+      name: species.name,
+      species: species,
+      stats: stats,
+      hatched: true
+    };
+  }
+
+  // 存储/读取
+  function persistBuddy() {
+    try { localStorage.setItem('my-buddy', JSON.stringify(buddy)); } catch(e) {}
+  }
+  function loadBuddyFromStorage() {
+    try {
+      const raw = localStorage.getItem('my-buddy');
+      if(!raw) return null;
+      const b = JSON.parse(raw);
+      if(b && b.hatched) {
+        // 重新计算物种保证一致性（但是存储里物种可能丢失，从种子再取一次）
+        const seed = getSeed();
+        const rng = mulberry32(seed);
+        const freshSpecies = SPECIES[Math.floor(rng() * SPECIES.length)];
+        b.species = freshSpecies;
+        if(!b.stats) b.stats = {};
+        STATS.forEach(s => { if(b.stats[s]===undefined) b.stats[s]=50; });
+        return b;
+      }
+      return null;
+    } catch(e) { return null; }
+  }
+
+  // 重置所有
+  function fullReset() {
+    try { localStorage.removeItem('my-buddy'); localStorage.removeItem('buddy-seed'); } catch(e) {}
+    seedValue = null;
+    buddy = null;
+    hatched = false;
+    document.getElementById('eggScreen').style.display = 'flex';
+    document.getElementById('petScreen').style.display = 'none';
+    document.getElementById('endModal').style.display = 'none';
+    currentEndType = null;
+    // 重置蛋动画
+    const eggEl = document.getElementById('eggEmoji');
+    eggEl.style.animation = 'eggWobble 1.2s infinite ease-in-out';
+    eggEl.textContent = '🥚';
+    // 清空气泡 (蛋界面气泡可以不改)
+    document.getElementById('speechBubble').innerText = '💬 Hatch me first!';
+  }
+
+  // 孵化并切换界面
+  function hatchNewBuddy() {
+    if(hatched) return;
+    buddy = createNewBuddy();
+    hatched = true;
+    persistBuddy();
+    // 播放动画 蛋 -> 破壳
+    const eggDiv = document.getElementById('eggEmoji');
+    eggDiv.style.animation = 'none';
+    eggDiv.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+      eggDiv.textContent = '🐣';
+      eggDiv.style.transform = '';
+    }, 120);
+    setTimeout(() => {
+      // 切换到宠物界面
+      document.getElementById('eggScreen').style.display = 'none';
+      document.getElementById('petScreen').style.display = 'flex';
+      document.getElementById('endModal').style.display = 'none';
+      renderPetUI();
+      spawnHearts(8);
+      animatePet('happy');
+      setBubble(`✨ A wild ${buddy.species.name} appears! I'm ${buddy.name}! ✨`);
+    }, 800);
+  }
+
+  // 渲染全部宠物UI
+  function renderPetUI() {
+    if(!buddy) return;
+    const sp = buddy.species;
+    document.getElementById('pet-emoji').textContent = sp.emoji;
+    document.getElementById('pet-name-display').textContent = buddy.name;
+    const rb = document.getElementById('raritySpan');
+    rb.textContent = sp.rarity.toUpperCase();
+    rb.className = `rarity-badge rarity-${sp.rarity}`;
+    document.getElementById('petBgGlow').style.background = sp.color + '66';
+    renderStats();
+  }
+
+  function renderStats() {
+    const grid = document.getElementById('statsGrid');
+    grid.innerHTML = '';
+    STATS.forEach((stat, idx) => {
+      let val = Math.min(100, Math.max(0, Math.round(buddy.stats[stat])));
+      const card = document.createElement('div');
+      card.className = 'stat-card';
+      card.innerHTML = `
+        <div class="stat-header"><span>${stat}</span><span class="stat-value">${val}</span></div>
+        <div class="stat-bar-bg"><div class="stat-fill" style="width:${val}%; background:${STAT_COLORS[idx]}"></div></div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // 应用属性变更并检查结束条件 (0或100)
+  function applyDeltaAndCheck(deltasArray) {
+    if(!buddy) return false;
+    STATS.forEach((s, i) => {
+      let newVal = buddy.stats[s] + deltasArray[i];
+      newVal = Math.min(100, Math.max(0, newVal));
+      buddy.stats[s] = newVal;
+    });
+    persistBuddy();
+    renderStats();
+    // 检查结束条件
+    for(let s of STATS) {
+      if(buddy.stats[s] >= 100) { triggerEnd('free'); return true; }
+      if(buddy.stats[s] <= 0)   { triggerEnd('lost'); return true; }
     }
-
-    dbg('provider', provider);
-    dbg('url', fetchUrl);
-
-    let res;
-    try { res = await fetch(fetchUrl, fetchOpts); }
-    catch(fe) { dbg('FETCH ERROR', fe.message||String(fe)); throw new Error('Network error: '+fe.message); }
-
-    dbg('status', res.status+' '+res.statusText);
-    let data;
-    try { data = await res.json(); }
-    catch(je) { dbg('JSON ERR', je.message); throw new Error('Bad response from API'); }
-    dbg('response', data);
-
-    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-
-    let reply = '';
-    if      (provider === 'anthropic') reply = data.content?.map(b => b.text||'').join('') || '';
-    else if (provider === 'gemini')    reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    else                               reply = data.choices?.[0]?.message?.content || '';
-
-    dbg('reply', reply);
-    if (!reply) throw new Error('Empty reply from API');
-
-    const ended = applyDelta('talk');
-    if (!ended) { setBubble(reply.slice(0, 200)); spawnHearts(2); }
-
-  } catch(e) {
-    dbg('CAUGHT ERROR', e.message||String(e));
-    setBubble('😵 ' + (e.message?.slice(0,100) || 'Something went wrong!'));
-  } finally {
-    document.getElementById('loading-reply').style.display = 'none';
+    return false;
   }
-}
 
-document.getElementById('talk-btn').addEventListener('click', talkToBuddy);
-document.getElementById('talk-input').addEventListener('keydown', e => { if (e.key==='Enter') talkToBuddy(); });
+  function triggerEnd(type) {
+    if(currentEndType) return;
+    currentEndType = type;
+    // 隐藏宠物主界面
+    document.getElementById('petScreen').style.display = 'none';
+    const endModal = document.getElementById('endModal');
+    endModal.style.display = 'flex';
+    if(type === 'free') {
+      document.getElementById('endFreeScreen').style.display = 'flex';
+      document.getElementById('endLostScreen').style.display = 'none';
+      document.getElementById('freeEmoji').textContent = buddy.species.emoji;
+      document.getElementById('freeMessage').innerHTML = `${buddy.name} the ${buddy.species.name} reached 100 in a stat! <br>They flew away to a magical place. 🌈`;
+    } else {
+      document.getElementById('endFreeScreen').style.display = 'none';
+      document.getElementById('endLostScreen').style.display = 'flex';
+      document.getElementById('lostEmoji').textContent = buddy.species.emoji;
+      document.getElementById('lostMessage').innerHTML = `${buddy.name} the ${buddy.species.name} got too sad and left... 💔`;
+    }
+  }
 
-// ════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════
-const saved = loadSaved();
-if (saved && saved.hatched) {
-  buddy   = saved;
-  hatched = true;
-  showPetScreen();
-  render();
-  setTimeout(() => setBubble(`Welcome back! I'm ${buddy.name}! 🎉`), 400);
-} else {
-  buddy = saved || createFreshBuddy();
-  save();
-  showEggScreen();
-}
+  // 动作通用
+  function doAction(actionKey, heartsCount, animClass, reactionArray) {
+    if(!hatched || !buddy) { if(!hatched) hatchNewBuddy(); return; }
+    if(currentEndType) return;
+    spawnHearts(heartsCount);
+    animatePet(animClass);
+    let delta = [...BASE_DELTA[actionKey]];
+    // 加一点随机 ±2
+    delta = delta.map(d => d + Math.floor(Math.random() * 5) - 2);
+    const ended = applyDeltaAndCheck(delta);
+    if(!ended) {
+      setBubble(reactionArray[Math.floor(Math.random() * reactionArray.length)]);
+    }
+  }
+
+  // 辅助动画
+  function spawnHearts(count) {
+    const container = document.getElementById('heartsContainer');
+    const icons = ['💕','💖','✨','🌟','💫','🎉'];
+    for(let i=0;i<count;i++) {
+      setTimeout(() => {
+        const h = document.createElement('div');
+        h.className = 'heart';
+        h.textContent = icons[Math.floor(Math.random() * icons.length)];
+        h.style.left = (20 + Math.random() * 60) + '%';
+        h.style.top = (20 + Math.random() * 50) + '%';
+        container.appendChild(h);
+        setTimeout(() => h.remove(), 1200);
+      }, i*100);
+    }
+  }
+  function animatePet(className) {
+    const el = document.getElementById('pet-emoji');
+    el.classList.add(className);
+    setTimeout(() => el.classList.remove(className), 500);
+  }
+  function setBubble(msg) {
+    const bubble = document.getElementById('speechBubble');
+    bubble.style.opacity = '0';
+    setTimeout(() => {
+      bubble.textContent = msg;
+      bubble.style.opacity = '1';
+    }, 120);
+  }
+
+  // 聊天 AI (保留全部能力)
+  async function talkHandler() {
+    if(!hatched || !buddy) { if(!hatched) hatchNewBuddy(); return; }
+    if(currentEndType) return;
+    const input = document.getElementById('talkInput');
+    const msg = input.value.trim();
+    if(!msg) return;
+    input.value = '';
+    animatePet('bounce');
+    const apiKey = getSavedApiKey();
+    if(!apiKey) {
+      setBubble("🔑 Add an API key above to chat with me! (Or just pet/feed/play)");
+      applyDeltaAndCheck(BASE_DELTA.talk.map(d => d + (Math.random()*3-1)));
+      return;
+    }
+    setBubble('✍️ ...');
+    document.getElementById('talkLoading').style.display = 'block';
+    const sp = buddy.species;
+    const statsDesc = STATS.map(s => `${s}:${Math.round(buddy.stats[s])}`).join(',');
+    const systemPrompt = `You are ${buddy.name}, a ${sp.rarity} ${sp.name} digital pet. Stats: ${statsDesc}. Reply 1 short sentence with emoji. Be in character: high chaos = wild, high wisdom = poetic, high snark = sassy. Return JSON: {"reply":"text","deltas":{"Wisdom":x,"Chaos":x,"Patience":x,"Snark":x,"Vibes":x}} with delta range -12..12.`;
+    const provider = getApiProvider();
+    const debugDiv = document.getElementById('debugWrap');
+    debugDiv.style.display = 'block';
+    const logDiv = document.getElementById('debugLog');
+    logDiv.textContent = '';
+    function dbg(txt) { logDiv.textContent += txt + '\n'; logDiv.scrollTop = logDiv.scrollHeight; }
+    try {
+      let url, opts;
+      const messages = [{role:'system',content:systemPrompt},{role:'user',content:msg}];
+      if(provider === 'gemini') {
+        url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+        opts = { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ system_instruction:{parts:[{text:systemPrompt}]}, contents:[{role:'user',parts:[{text:msg}]}], generationConfig:{maxOutputTokens:280, responseMimeType:'application/json'} }) };
+      } else if(provider === 'deepseek') {
+        url = 'https://api.deepseek.com/v1/chat/completions';
+        opts = { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+          body: JSON.stringify({ model:'deepseek-chat', max_tokens:280, response_format:{type:'json_object'}, messages }) };
+      } else if(provider === 'anthropic') {
+        url = 'https://api.anthropic.com/v1/messages';
+        opts = { method:'POST', headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:280, system:systemPrompt, messages:[{role:'user',content:msg}] }) };
+      } else {
+        url = 'https://api.openai.com/v1/chat/completions';
+        opts = { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+          body: JSON.stringify({ model:'gpt-4o-mini', max_tokens:280, response_format:{type:'json_object'}, messages }) };
+      }
+      dbg(`[req] ${provider}`);
+      const res = await fetch(url, opts);
+      const data = await res.json();
+      dbg(`[status] ${res.status}`);
+      if(data.error) throw new Error(data.error.message);
+      let raw = '';
+      if(provider === 'anthropic') raw = data.content?.[0]?.text || '';
+      else if(provider === 'gemini') raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      else raw = data.choices?.[0]?.message?.content || '';
+      let parsed;
+      try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { parsed = { reply: raw.slice(0,120), deltas:{} }; }
+      const reply = parsed.reply || '...';
+      const deltaObj = parsed.deltas || {};
+      const deltaArr = STATS.map(s => Math.min(12, Math.max(-12, Math.round(deltaObj[s] || 0))));
+      const ended = applyDeltaAndCheck(deltaArr);
+      if(!ended) setBubble(reply.slice(0, 180));
+      spawnHearts(2);
+    } catch(e) { dbg(`error: ${e.message}`); setBubble('😵 chat error, but I still love you!'); }
+    document.getElementById('talkLoading').style.display = 'none';
+  }
+
+  // API存储
+  function getSavedApiKey() { try { return localStorage.getItem('buddy-api-key') || ''; } catch(e) { return ''; } }
+  function getApiProvider() { try { return localStorage.getItem('buddy-api-provider') || 'anthropic'; } catch(e) { return 'anthropic'; } }
+  function refreshApiStatus() {
+    const key = getSavedApiKey();
+    const prov = getApiProvider();
+    document.getElementById('apiProviderSelect').value = prov;
+    const statusDiv = document.getElementById('apiStatusMsg');
+    if(key) { statusDiv.textContent = `✅ ${prov.toUpperCase()} key ready! Smart chat active`; statusDiv.className = 'api-status ok'; }
+    else { statusDiv.textContent = '🔑 No key — chat uses basic mode'; statusDiv.className = 'api-status'; }
+  }
+  document.getElementById('saveApiBtn').addEventListener('click', () => {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    const prov = document.getElementById('apiProviderSelect').value;
+    if(!key) return;
+    localStorage.setItem('buddy-api-key', key);
+    localStorage.setItem('buddy-api-provider', prov);
+    refreshApiStatus();
+    document.getElementById('apiKeyInput').value = '';
+  });
+  refreshApiStatus();
+
+  // 事件绑定
+  document.getElementById('eggEmoji').addEventListener('click', () => { if(!hatched) hatchNewBuddy(); });
+  document.getElementById('petBtn').addEventListener('click', () => doAction('pet',5,'happy',REACTIONS.pet));
+  document.getElementById('feedBtn').addEventListener('click', () => doAction('feed',4,'bounce',REACTIONS.feed));
+  document.getElementById('playBtn').addEventListener('click', () => doAction('play',6,'happy',REACTIONS.play));
+  document.getElementById('pet-emoji').addEventListener('click', () => { if(hatched && !currentEndType) { spawnHearts(3); animatePet('happy'); setBubble(REACTIONS.tap[Math.floor(Math.random()*REACTIONS.tap.length)]); } });
+  document.getElementById('talkSendBtn').addEventListener('click', talkHandler);
+  document.getElementById('talkInput').addEventListener('keypress', (e) => { if(e.key==='Enter') talkHandler(); });
+  // rename
+  document.getElementById('editNameBtn').addEventListener('click', () => {
+    document.getElementById('nameRow').style.display = 'none';
+    document.getElementById('nameEditRow').style.display = 'flex';
+    document.getElementById('nameInput').value = buddy.name;
+  });
+  document.getElementById('saveNameBtn').addEventListener('click', () => {
+    const newName = document.getElementById('nameInput').value.trim();
+    if(newName && buddy) { buddy.name = newName; persistBuddy(); renderPetUI(); setBubble(`My new name is ${newName}! 🎉`); }
+    document.getElementById('nameRow').style.display = 'flex';
+    document.getElementById('nameEditRow').style.display = 'none';
+  });
+  // reset buttons
+  document.getElementById('resetFromFree').addEventListener('click', fullReset);
+  document.getElementById('resetFromLost').addEventListener('click', fullReset);
+
+  // 初始化: 检查是否已有存档且已孵化
+  const existing = loadBuddyFromStorage();
+  if(existing && existing.hatched) {
+    buddy = existing;
+    hatched = true;
+    document.getElementById('eggScreen').style.display = 'none';
+    document.getElementById('petScreen').style.display = 'flex';
+    document.getElementById('endModal').style.display = 'none';
+    renderPetUI();
+    setBubble(`Welcome back! I'm ${buddy.name}~ 🎉`);
+  } else {
+    fullReset();
+  }
 </script>
 </body>
 </html>
